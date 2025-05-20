@@ -9,5 +9,13 @@
   "bpo_satisfaction": 6,
   "interests": ["technology", "leadership"],
   "financial_pressure": "medium",
-  "work_life_balance_importance": "high"
+  "work_life_balance_importance": "high",
+  "personality_traits": {
+    "conscientiousness": "high",
+    "extroversion": "medium",
+    "openness": "high"
+  },
+  "identified_alternative_field": true,
+  "alternative_field": "tech",
+  "researched_requirements": true
 }
