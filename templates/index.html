@@ -178,6 +178,26 @@
                 <option value="false">No</option>
               </select>
             </div>
+            <div class="col-md-6">
+              <label for="highest_education" class="form-label"
+                >Highest Education Level</label
+              >
+              <select
+                class="form-select"
+                id="highest_education"
+                name="highest_education"
+                required
+              >
+                <option value="High School">High School</option>
+                <option value="Some College">Some College</option>
+                <option value="Associate's Degree">Associate's Degree</option>
+                <option value="Bachelor's Degree" selected>
+                  Bachelor's Degree
+                </option>
+                <option value="Master's Degree">Master's Degree</option>
+                <option value="Doctorate">Doctorate</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -198,6 +218,28 @@
                 min="0"
                 max="30"
               />
+            </div>
+            <div class="col-md-6">
+              <label for="current_role" class="form-label">Current Role</label>
+              <select
+                class="form-select"
+                id="current_role"
+                name="current_role"
+                required
+              >
+                <option value="Customer Service Representative" selected>
+                  Customer Service Representative
+                </option>
+                <option value="Technical Support Agent">
+                  Technical Support Agent
+                </option>
+                <option value="Sales Agent">Sales Agent</option>
+                <option value="Team Leader">Team Leader</option>
+                <option value="Quality Analyst">Quality Analyst</option>
+                <option value="Trainer">Trainer</option>
+                <option value="Operations Manager">Operations Manager</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
             <div class="col-md-6">
               <label for="current_salary" class="form-label"
@@ -251,6 +293,57 @@
         </div>
 
         <div class="form-section">
+          <h3>Personality Traits</h3>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label for="conscientiousness" class="form-label"
+                >Conscientiousness (Detail-oriented, Organized)</label
+              >
+              <select
+                class="form-select"
+                id="conscientiousness"
+                name="conscientiousness"
+                required
+              >
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="extroversion" class="form-label"
+                >Extroversion (Social, Outgoing)</label
+              >
+              <select
+                class="form-select"
+                id="extroversion"
+                name="extroversion"
+                required
+              >
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="openness" class="form-label"
+                >Openness (Creative, Open to new experiences)</label
+              >
+              <select
+                class="form-select"
+                id="openness"
+                name="openness"
+                required
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high" selected>High</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
           <h3>Preferences</h3>
           <div class="row g-3">
             <div class="col-md-6">
@@ -264,6 +357,7 @@
                   name="interests"
                   value="technology"
                   id="interest_technology"
+                  checked
                 />
                 <label class="form-check-label" for="interest_technology"
                   >Technology</label
@@ -276,6 +370,7 @@
                   name="interests"
                   value="leadership"
                   id="interest_leadership"
+                  checked
                 />
                 <label class="form-check-label" for="interest_leadership"
                   >Leadership</label
@@ -305,6 +400,42 @@
                   >Creative</label
                 >
               </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="interests"
+                  value="learning"
+                  id="interest_learning"
+                />
+                <label class="form-check-label" for="interest_learning"
+                  >Learning/Academic</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="interests"
+                  value="management"
+                  id="interest_management"
+                />
+                <label class="form-check-label" for="interest_management"
+                  >Management</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="interests"
+                  value="specialized_bpo"
+                  id="interest_specialized_bpo"
+                />
+                <label class="form-check-label" for="interest_specialized_bpo"
+                  >Specialized BPO Roles</label
+                >
+              </div>
             </div>
             <div class="col-md-6">
               <label for="financial_pressure" class="form-label"
@@ -320,6 +451,71 @@
                 <option value="medium" selected>Medium</option>
                 <option value="high">High</option>
               </select>
+
+              <div class="mt-3">
+                <label for="work_life_balance_importance" class="form-label"
+                  >Work-Life Balance Importance</label
+                >
+                <select
+                  class="form-select"
+                  id="work_life_balance_importance"
+                  name="work_life_balance_importance"
+                  required
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high" selected>High</option>
+                </select>
+              </div>
+
+              <div class="mt-3">
+                <label for="identified_alternative_field" class="form-label"
+                  >Have you identified an alternative field?</label
+                >
+                <select
+                  class="form-select"
+                  id="identified_alternative_field"
+                  name="identified_alternative_field"
+                  required
+                >
+                  <option value="true" selected>Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+
+              <div class="mt-3">
+                <label for="alternative_field" class="form-label"
+                  >Alternative Field of Interest</label
+                >
+                <select
+                  class="form-select"
+                  id="alternative_field"
+                  name="alternative_field"
+                  required
+                >
+                  <option value="tech" selected>Technology/IT</option>
+                  <option value="business">Business/Management</option>
+                  <option value="education">Education/Training</option>
+                  <option value="healthcare">Healthcare</option>
+                  <option value="creative">Creative/Design</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div class="mt-3">
+                <label for="researched_requirements" class="form-label"
+                  >Have you researched requirements for this field?</label
+                >
+                <select
+                  class="form-select"
+                  id="researched_requirements"
+                  name="researched_requirements"
+                  required
+                >
+                  <option value="true" selected>Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>

@@ -112,6 +112,9 @@ class Blackboard:
             {"id": "advance_bpo", "name": "Advance in BPO (Team Lead/Specialist)", "category": "bpo"},
             {"id": "switch_tech", "name": "Switch to Tech/IT", "category": "transition"},
             {"id": "switch_business", "name": "Switch to Business Role", "category": "transition"},
+            {"id": "switch_education", "name": "Switch to Education/Training", "category": "transition"},
+            {"id": "switch_healthcare", "name": "Switch to Healthcare", "category": "transition"},
+            {"id": "switch_creative", "name": "Switch to Creative/Design", "category": "transition"},
             {"id": "further_education", "name": "Pursue Further Education", "category": "education"}
         ]
 
@@ -165,6 +168,69 @@ class Blackboard:
                     "factor": "competition",
                     "description": "May face competition from business graduates",
                     "weight": 0.6
+                })
+            elif option_id == "switch_education":
+                self.pros_cons[option_id]["pros"].append({
+                    "factor": "work_life_balance",
+                    "description": "Education sector often offers better work-life balance",
+                    "weight": 0.85
+                })
+                self.pros_cons[option_id]["pros"].append({
+                    "factor": "job_satisfaction",
+                    "description": "Teaching and training roles often provide high job satisfaction",
+                    "weight": 0.8
+                })
+                self.pros_cons[option_id]["cons"].append({
+                    "factor": "salary_adjustment",
+                    "description": "May require initial salary adjustment compared to BPO",
+                    "weight": 0.7
+                })
+                self.pros_cons[option_id]["cons"].append({
+                    "factor": "qualification_requirements",
+                    "description": "May require specific teaching credentials or certifications",
+                    "weight": 0.65
+                })
+            elif option_id == "switch_healthcare":
+                self.pros_cons[option_id]["pros"].append({
+                    "factor": "job_security",
+                    "description": "Healthcare sector offers strong job security and demand",
+                    "weight": 0.85
+                })
+                self.pros_cons[option_id]["pros"].append({
+                    "factor": "meaningful_work",
+                    "description": "Provides opportunity for meaningful, impactful work",
+                    "weight": 0.8
+                })
+                self.pros_cons[option_id]["cons"].append({
+                    "factor": "training_requirements",
+                    "description": "Requires specific healthcare training or certifications",
+                    "weight": 0.75
+                })
+                self.pros_cons[option_id]["cons"].append({
+                    "factor": "high_stress",
+                    "description": "Some healthcare roles can involve high stress levels",
+                    "weight": 0.6
+                })
+            elif option_id == "switch_creative":
+                self.pros_cons[option_id]["pros"].append({
+                    "factor": "self_expression",
+                    "description": "Allows for creativity and self-expression in work",
+                    "weight": 0.85
+                })
+                self.pros_cons[option_id]["pros"].append({
+                    "factor": "diverse_opportunities",
+                    "description": "Creative fields offer diverse project opportunities",
+                    "weight": 0.75
+                })
+                self.pros_cons[option_id]["cons"].append({
+                    "factor": "income_variability",
+                    "description": "May involve variable income, especially when starting",
+                    "weight": 0.8
+                })
+                self.pros_cons[option_id]["cons"].append({
+                    "factor": "competitive_field",
+                    "description": "Creative industries can be highly competitive",
+                    "weight": 0.7
                 })
             elif option_id == "further_education":
                 self.pros_cons[option_id]["pros"].append({
@@ -323,6 +389,37 @@ class CareerCounselor(KnowledgeSource):
                 "weight": 0.7
             })
 
+            # Also align with education career path
+            blackboard.pros_cons["switch_education"]["pros"].append({
+                "factor": "passion_alignment",
+                "description": "Aligns with expressed interest in learning and academics",
+                "weight": 0.9
+            })
+
+        if 'creative' in interests:
+            blackboard.pros_cons["switch_creative"]["pros"].append({
+                "factor": "passion_alignment",
+                "description": "Aligns with expressed interest in creative work",
+                "weight": 0.9
+            })
+            blackboard.pros_cons["switch_creative"]["pros"].append({
+                "factor": "self_expression",
+                "description": "Provides outlet for creative expression and innovation",
+                "weight": 0.85
+            })
+            blackboard.pros_cons["switch_creative"]["cons"].append({
+                "factor": "market_uncertainty",
+                "description": "Creative markets can be unpredictable and competitive",
+                "weight": 0.7
+            })
+
+        if 'specialized_bpo' in interests:
+            blackboard.pros_cons["advance_bpo"]["pros"].append({
+                "factor": "specialization_interest",
+                "description": "Aligns with interest in specialized BPO roles",
+                "weight": 0.85
+            })
+
         # Make a recommendation
         self._make_recommendation(blackboard)
 
@@ -374,10 +471,18 @@ class CareerCounselor(KnowledgeSource):
         has_researched_requirements = user.get('researched_requirements', False)
 
         if dissatisfaction or (has_identified_alternative and has_researched_requirements):
-            if user.get('alternative_field') == 'tech':
+            alternative_field = user.get('alternative_field')
+
+            if alternative_field == 'tech':
                 recommendation = "switch_tech"
-            elif user.get('alternative_field') == 'business':
+            elif alternative_field == 'business':
                 recommendation = "switch_business"
+            elif alternative_field == 'education':
+                recommendation = "switch_education"
+            elif alternative_field == 'healthcare':
+                recommendation = "switch_healthcare"
+            elif alternative_field == 'creative':
+                recommendation = "switch_creative"
             else:
                 # If no specific field or default
                 recommendation = "further_education"
@@ -490,10 +595,20 @@ class SeniorBPOEmployee(KnowledgeSource):
             explanation = "Strong performance and interest in leadership/specialized roles indicate promotion potential."
 
         elif user.get('bpo_satisfaction', 5) < 3 and user.get('identified_alternative_field', False):
-            if user.get('alternative_field') == 'tech':
+            alternative_field = user.get('alternative_field')
+
+            if alternative_field == 'tech':
                 recommendation = "switch_tech"
-            else:
+            elif alternative_field == 'business':
                 recommendation = "switch_business"
+            elif alternative_field == 'education':
+                recommendation = "switch_education"
+            elif alternative_field == 'healthcare':
+                recommendation = "switch_healthcare"
+            elif alternative_field == 'creative':
+                recommendation = "switch_creative"
+            else:
+                recommendation = "further_education"
 
             explanation = "Given dissatisfaction and interest in a specific alternative, transition is advisable while maintaining BPO income."
 
@@ -592,17 +707,34 @@ class AcademicAdvisor(KnowledgeSource):
         alternative_field = user.get('alternative_field', None)
         financial_pressure = user.get('financial_pressure', 'medium')
 
-        if has_clear_interest and alternative_field == 'tech':
-            recommendation = "switch_tech"
-            notes = "Consider bootcamps or IT certifications while maintaining part-time BPO work."
+        if has_clear_interest:
+            if alternative_field == 'tech':
+                recommendation = "switch_tech"
+                notes = "Consider bootcamps or IT certifications while maintaining part-time BPO work."
 
-        elif has_clear_interest and alternative_field == 'business':
-            if user.get('has_degree', False):
-                recommendation = "switch_business"
-                notes = "Leverage existing degree and pursue targeted business certifications."
+            elif alternative_field == 'business':
+                if user.get('has_degree', False):
+                    recommendation = "switch_business"
+                    notes = "Leverage existing degree and pursue targeted business certifications."
+                else:
+                    recommendation = "further_education"
+                    notes = "Consider business administration courses at community college level."
+
+            elif alternative_field == 'education':
+                recommendation = "switch_education"
+                notes = "Consider education certifications or teaching credentials while maintaining part-time work."
+
+            elif alternative_field == 'healthcare':
+                recommendation = "switch_healthcare"
+                notes = "Research healthcare certifications that align with your interests and time constraints."
+
+            elif alternative_field == 'creative':
+                recommendation = "switch_creative"
+                notes = "Build a portfolio through freelance work while maintaining your current position for stability."
+
             else:
                 recommendation = "further_education"
-                notes = "Consider business administration courses at community college level."
+                notes = "A structured educational program would help clarify your path forward."
 
         elif not user.get('has_degree', False) and financial_pressure != 'high':
             recommendation = "further_education"
@@ -805,7 +937,10 @@ class ControlShell:
 class CareerSimulation:
     """Simulates career progression outcomes under different scenarios."""
 
-    def __init__(self):
+    def __init__(self, seed=42):
+        # Set random seed for reproducibility
+        np.random.seed(seed)
+
         # Career paths and their properties
         self.career_paths = {
             "stay_bpo": {
@@ -835,6 +970,27 @@ class CareerSimulation:
                 "job_satisfaction_baseline": 7.0,
                 "job_satisfaction_variance": 1.8,
                 "stability": 0.65
+            },
+            "switch_education": {
+                "salary_growth_rate": 0.06,  # Moderate growth
+                "promotion_probability": 0.15,
+                "job_satisfaction_baseline": 8.5,  # High satisfaction
+                "job_satisfaction_variance": 1.2,
+                "stability": 0.85  # High stability
+            },
+            "switch_healthcare": {
+                "salary_growth_rate": 0.08,  # Good growth
+                "promotion_probability": 0.18,
+                "job_satisfaction_baseline": 7.8,
+                "job_satisfaction_variance": 1.5,
+                "stability": 0.80  # High stability
+            },
+            "switch_creative": {
+                "salary_growth_rate": 0.07,  # Variable growth
+                "promotion_probability": 0.16,
+                "job_satisfaction_baseline": 8.2,  # High satisfaction potential
+                "job_satisfaction_variance": 2.5,  # But high variance
+                "stability": 0.60  # Lower stability
             },
             "further_education": {
                 "salary_growth_rate": 0.12,  # Higher long-term growth
@@ -866,11 +1022,24 @@ class CareerSimulation:
         initial_salary = user_profile.get('current_salary', 25000)  # Default in PHP
         current_salary = initial_salary
 
+        # Apply initial salary adjustments based on career path
         if path_id in ["switch_tech", "switch_business"]:
-            # Initial salary adjustment for switching fields
+            # Initial salary adjustment for switching to tech or business
             current_salary = initial_salary * 0.9  # 10% reduction initially
 
-        if path_id == "further_education":
+        elif path_id == "switch_education":
+            # Initial salary adjustment for switching to education
+            current_salary = initial_salary * 0.85  # 15% reduction initially
+
+        elif path_id == "switch_healthcare":
+            # Initial salary adjustment for switching to healthcare
+            current_salary = initial_salary * 0.8  # 20% reduction initially (but higher long-term potential)
+
+        elif path_id == "switch_creative":
+            # Initial salary adjustment for switching to creative fields
+            current_salary = initial_salary * 0.75  # 25% reduction initially (more significant adjustment)
+
+        elif path_id == "further_education":
             # Further reduction for education period
             current_salary = initial_salary * 0.6  # 40% reduction during education
 
@@ -1245,7 +1414,7 @@ class CareerSimulation:
 class CareerTransitionSystem:
     """Main class integrating both expert system and simulation components."""
 
-    def __init__(self):
+    def __init__(self, seed=42):
         # Initialize expert system components
         self.blackboard_system = BlackboardSystem()
 
@@ -1254,8 +1423,8 @@ class CareerTransitionSystem:
         self.blackboard_system.register_knowledge_source(SeniorBPOEmployee())
         self.blackboard_system.register_knowledge_source(AcademicAdvisor())
 
-        # Initialize simulation component
-        self.simulation = CareerSimulation()
+        # Initialize simulation component with fixed seed for reproducibility
+        self.simulation = CareerSimulation(seed=seed)
 
     def get_recommendation(self, user_profile):
         """Get career recommendation based on user profile."""
