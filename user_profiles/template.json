@@ -1,0 +1,19 @@
+{
+  "personal": {
+    "age": 25,
+    "has_degree": true,
+    "highest_education": "Bachelor's Degree"
+  },
+  "career": {
+    "bpo_experience_years": 3,
+    "current_role": "Customer Service Representative",
+    "current_salary": 30000,
+    "performance_level": "good"
+  },
+  "preferences": {
+    "bpo_satisfaction": 6,
+    "interests": ["technology", "leadership"],
+    "financial_pressure": "medium",
+    "work_life_balance_importance": "high"
+  }
+}

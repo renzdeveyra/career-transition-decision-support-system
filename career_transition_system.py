@@ -6,6 +6,23 @@ combined with a simulation model to evaluate career decisions across different s
 
 The system focuses on providing guidance to young professionals in the Philippines,
 particularly those in the BPO (Business Process Outsourcing) industry considering career transitions.
+
+Classes:
+    BlackboardSystem: Central system managing the blackboard and knowledge sources
+    Blackboard: Central data structure holding problem state and partial solutions
+    KnowledgeSource: Abstract base class for all knowledge sources
+    CareerCounselor: Knowledge source representing a career counselor's expertise
+    SeniorBPOEmployee: Knowledge source representing a senior BPO employee's expertise
+    AcademicAdvisor: Knowledge source representing an academic advisor's expertise
+    ControlShell: Controls the problem-solving process
+    CareerSimulation: Simulates career progression outcomes under different scenarios
+    CareerTransitionSystem: Main class integrating both expert system and simulation components
+
+Usage:
+    system = CareerTransitionSystem()
+    recommendation = system.get_recommendation(user_profile)
+    simulation = system.simulate_outcomes(user_profile)
+    validation = system.validate_recommendation(user_profile)
 """
 
 import json
@@ -124,8 +141,7 @@ class KnowledgeSource:
         
     def contribute(self, blackboard):
         """Contribute knowledge to the blackboard."""
-        # Default implementation - override in subclasses
-        pass
+        raise NotImplementedError("Subclasses must implement contribute()")
 
 
 class CareerCounselor(KnowledgeSource):
