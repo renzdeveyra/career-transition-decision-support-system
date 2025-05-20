@@ -1212,162 +1212,157 @@ class CareerTransitionSystem:
         }
     
     def explain_recommendation(self, results):
-        """Generate human-readable explanation of recommendation."""
-        if not results or "expert_recommendation" not in results:
-            return "No recommendation available."
-            
-        recommendation = results["expert_recommendation"]
-        validation = results.get("validation", {})
+        """Generate a human-readable explanation of the recommendation."""
+        explanation = []
         
         # Get top recommendation
-        top_rec = recommendation.get("top_recommendation", {})
+        top_rec = results.get("expert_recommendation", {}).get("top_recommendation", {})
         if not top_rec:
-            return "No clear recommendation found."
-            
+            return "Unable to generate recommendation with the provided information."
+        
         top_path_id = top_rec.get("id")
-        top_path_name = top_rec.get("name", top_path_id)
+        top_path_name = top_rec.get("name")
+        
+        # Get confidence score
+        confidence_score = results.get("expert_recommendation", {}).get("confidence_scores", {}).get(top_path_id, 0)
+        
+        # Get alternative recommendation
+        alt_rec = results.get("expert_recommendation", {}).get("alternative_recommendation", {})
+        alt_path_name = alt_rec.get("name") if alt_rec else None
+        
+        # Format confidence level
+        confidence_level = "High" if confidence_score >= 70 else "Medium" if confidence_score >= 40 else "Low"
         
         # Build explanation
-        explanation = [
-            f"# Career Recommendation: {top_path_name}",
-            "\n## Summary",
-            f"Based on your profile, the recommended career path is to **{top_path_name}**."
-        ]
+        explanation.append(f"# {top_path_name}")
+        explanation.append(f"## Career Recommendation: {top_path_name}")
         
-        # Add confidence level
-        confidence = top_rec.get("score", 0)
-        confidence_level = "High" if confidence > 75 else "Medium" if confidence > 50 else "Low"
-        explanation.append(f"Confidence level: **{confidence_level}** ({confidence:.1f}/100)")
+        # Summary section
+        explanation.append("## Summary")
+        explanation.append(f"Based on your profile, the recommended career path is to **{top_path_name}**. Confidence level: **{confidence_level}** ({confidence_score:.1f}/100)")
         
-        # Add alternative
-        alt_rec = recommendation.get("alternative_recommendation", {})
-        if alt_rec:
-            alt_path_name = alt_rec.get("name", alt_rec.get("id", "No alternative"))
-            explanation.append(f"\nAlternative option: **{alt_path_name}**")
+        if alt_path_name:
+            explanation.append(f"\nAlternative option: {alt_path_name}")
         
-        # Add key considerations
-        considerations = recommendation.get("considerations", [])
-        if considerations:
-            explanation.append("\n## Key Considerations")
-            for consideration in considerations:
-                explanation.append(f"- {consideration.get('description', '')}")
-        
-        # Add expert inputs
-        expert_recs = recommendation.get("expert_recommendations", {})
-        if expert_recs:
-            explanation.append("\n## Expert Inputs")
-            
-            for expert, details in expert_recs.items():
-                if details:
-                    expert_name = expert.replace("_", " ").title()
-                    expert_choice = details.get("recommendation", "")
-                    
-                    if expert_choice in recommendation.get("option_details", {}):
-                        expert_choice_name = recommendation["option_details"][expert_choice]["name"]
-                    else:
-                        expert_choice_name = expert_choice
-                        
-                    explanation.append(f"\n### {expert_name}")
-                    explanation.append(f"Recommendation: **{expert_choice_name}**")
-                    explanation.append(f"Rationale: {details.get('explanation', 'No explanation provided.')}")
-                    
-                    if details.get("additional_notes"):
-                        explanation.append(f"Additional notes: {details.get('additional_notes')}")
-        
-        # Add pros and cons of recommended path
-        if top_path_id in recommendation.get("option_details", {}):
-            option_details = recommendation["option_details"][top_path_id]
-            
-            explanation.append(f"\n## Pros and Cons of {top_path_name}")
-            
-            explanation.append("\n### Pros")
-            pros = option_details.get("pros", [])
-            if pros:
-                for pro in pros:
-                    explanation.append(f"- {pro.get('description', '')}")
-            else:
-                explanation.append("- No specific pros identified.")
-            
-            explanation.append("\n### Cons")
-            cons = option_details.get("cons", [])
-            if cons:
-                for con in cons:
-                    explanation.append(f"- {con.get('description', '')}")
-            else:
-                explanation.append("- No specific cons identified.")
-        
-        # Add simulation insights
-        if "simulation_results" in results and top_path_id in results["simulation_results"]:
-            simulation = results["simulation_results"][top_path_id]["average_case"]
-            
-            explanation.append("\n## Simulation Results")
-            explanation.append(f"The simulation projects the following outcomes over a {len(simulation['years'])-1} year period:")
-            
-            explanation.append(f"\n- Projected salary growth: **{simulation['salary_growth_pct']:.1f}%**")
-            explanation.append(f"- Average job satisfaction: **{simulation['avg_satisfaction']:.1f}/10**")
-            explanation.append(f"- Average job stability: **{simulation['avg_stability']:.2f}** (1.00 = maximum stability)")
-        
-        # Add validation insights
-        if "validation" in results and results["validation"]:
-            validation = results["validation"]
-            alignment = validation.get("overall_alignment", 0)
-            
-            explanation.append("\n## Validation")
-            
-            if alignment >= 0.8:
-                explanation.append("The expert recommendation and simulation results are **strongly aligned**.")
-            elif alignment >= 0.5:
-                explanation.append("The expert recommendation and simulation results are **moderately aligned**.")
-            else:
-                explanation.append("There are some **discrepancies** between expert recommendations and simulation results.")
-            
-            # Add information about conflicts
-            conflicts = validation.get("conflicts", [])
-            if conflicts:
-                explanation.append("\nPotential alternative paths worth considering based on simulation:")
+        # Expert inputs
+        explanation.append("## Expert Inputs")
+        for expert, details in results.get("expert_recommendation", {}).get("expert_recommendations", {}).items():
+            if details:
+                expert_name = expert.replace("_", " ").title()
+                explanation.append(f"### {expert_name}")
+                explanation.append(f"Recommendation: {details.get('recommendation_name', 'Not specified')}")
+                explanation.append(f"Rationale: {details.get('explanation', 'Not provided')}")
                 
-                for conflict in conflicts:
-                    alt_path = conflict.get("simulation_preferred")
-                    
-                    # Find the path name if available
-                    alt_path_name = alt_path
-                    for option in recommendation.get("career_options", []):
-                        if option.get("id") == alt_path:
-                            alt_path_name = option.get("name", alt_path)
-                            break
-                    
-                    explanation.append(f"- **{alt_path_name}**: May offer better outcomes in some scenarios")
+                if details.get("additional_notes"):
+                    explanation.append(f"Additional notes: {details.get('additional_notes')}")
         
-        # Add next steps
-        explanation.append("\n## Next Steps")
+        # Pros and cons
+        explanation.append(f"## Pros and Cons of {top_path_name}")
+        
+        # Get unique pros and cons to avoid repetition
+        pros = results.get("expert_recommendation", {}).get("pros_cons", {}).get(top_path_id, {}).get("pros", [])
+        cons = results.get("expert_recommendation", {}).get("pros_cons", {}).get(top_path_id, {}).get("cons", [])
+        
+        # Remove duplicates by description
+        unique_pros = []
+        unique_pros_descriptions = set()
+        for pro in pros:
+            desc = pro.get("description", "")
+            if desc and desc not in unique_pros_descriptions:
+                unique_pros.append(pro)
+                unique_pros_descriptions.add(desc)
+        
+        unique_cons = []
+        unique_cons_descriptions = set()
+        for con in cons:
+            desc = con.get("description", "")
+            if desc and desc not in unique_cons_descriptions:
+                unique_cons.append(con)
+                unique_cons_descriptions.add(desc)
+        
+        explanation.append("### Pros")
+        if unique_pros:
+            for pro in unique_pros:
+                explanation.append(f"- {pro.get('description', 'Not specified')}")
+        else:
+            explanation.append("- No specific pros identified.")
+        
+        explanation.append("### Cons")
+        if unique_cons:
+            for con in unique_cons:
+                explanation.append(f"- {con.get('description', 'Not specified')}")
+        else:
+            explanation.append("- No specific cons identified.")
+        
+        # Simulation results
+        explanation.append("## Simulation Results")
+        sim_results = results.get("simulation_results", {}).get(top_path_id, {})
+        
+        if sim_results:
+            explanation.append("The simulation projects the following outcomes over a 5 year period:")
+            explanation.append("")
+            
+            # Calculate salary growth percentage
+            initial_salary = sim_results.get("salaries", [0, 0])[0]
+            final_salary = sim_results.get("salaries", [0, 0])[-1]
+            salary_growth = ((final_salary - initial_salary) / initial_salary) * 100 if initial_salary > 0 else 0
+            
+            explanation.append(f"- Projected salary growth: {salary_growth:.1f}%")
+            
+            # Calculate average satisfaction
+            satisfactions = sim_results.get("satisfaction", [])
+            avg_satisfaction = sum(satisfactions) / len(satisfactions) if satisfactions else 0
+            explanation.append(f"- Average job satisfaction: {avg_satisfaction:.1f}/10")
+            
+            # Calculate average stability
+            stabilities = sim_results.get("stability", [])
+            avg_stability = sum(stabilities) / len(stabilities) if stabilities else 0
+            explanation.append(f"- Average job stability: {avg_stability:.2f} (1.00 = maximum stability)")
+        
+        # Validation
+        explanation.append("## Validation")
+        validation = results.get("validation", {})
+        
+        if validation:
+            alignment = validation.get("overall_alignment", 0)
+            alignment_text = "strongly" if alignment > 0.8 else "moderately" if alignment > 0.5 else "weakly"
+            
+            explanation.append(f"The expert recommendation and simulation results are {alignment_text} aligned.")
+            
+            # Alternative paths
+            alternatives = validation.get("alternatives", [])
+            if alternatives:
+                explanation.append("\nPotential alternative paths worth considering based on simulation:")
+                explanation.append("")
+                for alt in alternatives:
+                    explanation.append(f"- {alt.get('name', '')}: {alt.get('reason', '')}")
+        
+        # Next steps
+        explanation.append("## Next Steps")
         explanation.append("Based on this recommendation, consider:")
+        explanation.append("")
         
         if top_path_id == "stay_bpo":
             explanation.append("- Identifying specific skills to develop within your current role")
             explanation.append("- Setting clear performance goals to stand out in your current position")
             explanation.append("- Networking with colleagues in other departments to explore internal opportunities")
-            
         elif top_path_id == "advance_bpo":
             explanation.append("- Discussing advancement opportunities with your supervisor")
             explanation.append("- Identifying leadership training or specialized skills needed for promotion")
             explanation.append("- Seeking a mentor in a senior role to guide your advancement")
-            
         elif top_path_id == "switch_tech":
-            explanation.append("- Researching specific technical skills in demand in the job market")
-            explanation.append("- Exploring short-term technical courses or certifications")
-            explanation.append("- Building a portfolio of technical projects to demonstrate skills")
-            
+            explanation.append("- Researching in-demand tech skills and certifications")
+            explanation.append("- Exploring entry-level tech roles that align with your BPO experience")
+            explanation.append("- Building a portfolio of tech projects to demonstrate your capabilities")
         elif top_path_id == "switch_business":
             explanation.append("- Identifying transferable skills from BPO to business roles")
             explanation.append("- Researching business certifications or courses to fill skill gaps")
             explanation.append("- Networking with professionals in your target business field")
-            
         elif top_path_id == "further_education":
-            explanation.append("- Researching educational programs aligned with your career goals")
+            explanation.append("- Researching degree programs or certifications that align with your career goals")
             explanation.append("- Exploring part-time or online education options to maintain income")
-            explanation.append("- Identifying potential scholarships or financial aid opportunities")
+            explanation.append("- Investigating financial aid or employer tuition assistance programs")
         
-        # Return formatted explanation
         return "\n".join(explanation)
 
 
