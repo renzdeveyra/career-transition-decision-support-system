@@ -890,18 +890,26 @@ class ControlShell:
             cons = blackboard.pros_cons[option_id]["cons"]
 
             # Calculate weighted score from pros and cons
-            pro_score = sum(p.get("weight", 0.5) for p in pros)
-            con_score = sum(c.get("weight", 0.5) for c in cons)
+            # Use average weight to avoid penalizing options with more factors
+            avg_pro_weight = sum(p.get("weight", 0.5) for p in pros) / max(1, len(pros))
+            avg_con_weight = sum(c.get("weight", 0.5) for c in cons) / max(1, len(cons))
 
-            # Confidence calculation
-            # Scale to 0-100 and adjust based on number of factors
-            pro_factor = pro_score * (10 / (1 + len(pros))) if pros else 0
-            con_factor = con_score * (10 / (1 + len(cons))) if cons else 0
+            # Bonus for having more pros (diminishing returns after 3)
+            pro_count_bonus = min(15, len(pros) * 5)  # 5 points per pro, max 15
 
-            confidence = pro_factor - (con_factor * 0.8)  # Cons weighted slightly less
+            # Base confidence calculation - scale of 0-100
+            # Start with a baseline of 40 to avoid very low scores
+            base_confidence = 40
 
-            # Scale to 0-100 range and ensure non-negative
-            scaled_confidence = max(0, min(100, confidence * 10))
+            # Add weighted contribution from pros and cons
+            pro_contribution = avg_pro_weight * 60  # Pros can contribute up to 60 points (increased)
+            con_contribution = avg_con_weight * 25  # Cons can reduce up to 25 points (decreased)
+
+            # Calculate final confidence score
+            confidence = base_confidence + pro_contribution - con_contribution + pro_count_bonus
+
+            # Ensure within 0-100 range
+            scaled_confidence = max(0, min(100, confidence))
 
             blackboard.confidence_scores[option_id] = scaled_confidence
 
@@ -921,7 +929,7 @@ class ControlShell:
         }
 
         # Expert recommendation boost
-        expert_boost = 30  # Points to add for a recommendation
+        expert_boost = 60  # Points to add for a recommendation (increased from 50)
 
         # Apply expert boosts
         for expert, details in blackboard.expert_recommendations.items():
@@ -948,56 +956,72 @@ class CareerSimulation:
                 "promotion_probability": 0.15,  # 15% chance per year
                 "job_satisfaction_baseline": 6.0,  # Scale 1-10
                 "job_satisfaction_variance": 1.0,
-                "stability": 0.8  # High stability
+                "stability": 0.8,  # High stability
+                "growth_acceleration": 0.0,  # No acceleration in growth
+                "salary_ceiling_factor": 1.5  # Limited long-term ceiling (50% above starting)
             },
             "advance_bpo": {
-                "salary_growth_rate": 0.08,  # 8% annual growth
-                "promotion_probability": 0.25,  # 25% chance per year
+                "salary_growth_rate": 0.07,  # 7% annual growth (reduced from 8%)
+                "promotion_probability": 0.20,  # 20% chance per year (reduced from 25%)
                 "job_satisfaction_baseline": 7.0,
                 "job_satisfaction_variance": 1.5,
-                "stability": 0.75
+                "stability": 0.75,
+                "growth_acceleration": 0.005,  # Slight acceleration in growth
+                "salary_ceiling_factor": 2.5  # Moderate ceiling (150% above starting)
             },
             "switch_tech": {
-                "salary_growth_rate": 0.10,  # 10% annual growth
-                "promotion_probability": 0.20,
+                "salary_growth_rate": 0.08,  # 8% initial annual growth (reduced from 10%)
+                "promotion_probability": 0.18,  # 18% chance per year
                 "job_satisfaction_baseline": 7.5,
                 "job_satisfaction_variance": 2.0,
-                "stability": 0.7
+                "stability": 0.7,
+                "growth_acceleration": 0.015,  # Strong acceleration in growth over time
+                "salary_ceiling_factor": 4.0  # High ceiling (300% above starting)
             },
             "switch_business": {
-                "salary_growth_rate": 0.07,
-                "promotion_probability": 0.18,
+                "salary_growth_rate": 0.06,  # 6% initial annual growth
+                "promotion_probability": 0.17,  # 17% chance per year
                 "job_satisfaction_baseline": 7.0,
                 "job_satisfaction_variance": 1.8,
-                "stability": 0.65
+                "stability": 0.65,
+                "growth_acceleration": 0.01,  # Moderate acceleration in growth
+                "salary_ceiling_factor": 3.0  # Good ceiling (200% above starting)
             },
             "switch_education": {
-                "salary_growth_rate": 0.06,  # Moderate growth
-                "promotion_probability": 0.15,
+                "salary_growth_rate": 0.05,  # 5% initial annual growth
+                "promotion_probability": 0.14,  # 14% chance per year
                 "job_satisfaction_baseline": 8.5,  # High satisfaction
                 "job_satisfaction_variance": 1.2,
-                "stability": 0.85  # High stability
+                "stability": 0.85,  # High stability
+                "growth_acceleration": 0.005,  # Slight acceleration in growth
+                "salary_ceiling_factor": 2.0  # Moderate ceiling (100% above starting)
             },
             "switch_healthcare": {
-                "salary_growth_rate": 0.08,  # Good growth
-                "promotion_probability": 0.18,
+                "salary_growth_rate": 0.06,  # 6% initial annual growth
+                "promotion_probability": 0.16,  # 16% chance per year
                 "job_satisfaction_baseline": 7.8,
                 "job_satisfaction_variance": 1.5,
-                "stability": 0.80  # High stability
+                "stability": 0.80,  # High stability
+                "growth_acceleration": 0.01,  # Moderate acceleration in growth
+                "salary_ceiling_factor": 3.5  # Good ceiling (250% above starting)
             },
             "switch_creative": {
-                "salary_growth_rate": 0.07,  # Variable growth
-                "promotion_probability": 0.16,
+                "salary_growth_rate": 0.05,  # 5% initial annual growth
+                "promotion_probability": 0.15,  # 15% chance per year
                 "job_satisfaction_baseline": 8.2,  # High satisfaction potential
                 "job_satisfaction_variance": 2.5,  # But high variance
-                "stability": 0.60  # Lower stability
+                "stability": 0.60,  # Lower stability
+                "growth_acceleration": 0.012,  # Good acceleration for successful creatives
+                "salary_ceiling_factor": 5.0  # Very high ceiling but harder to reach
             },
             "further_education": {
-                "salary_growth_rate": 0.12,  # Higher long-term growth
-                "promotion_probability": 0.22,
+                "salary_growth_rate": 0.06,  # 6% initial annual growth (reduced from 12%)
+                "promotion_probability": 0.16,  # 16% chance per year
                 "job_satisfaction_baseline": 8.0,
                 "job_satisfaction_variance": 1.5,
-                "stability": 0.6  # Lower initial stability due to transition
+                "stability": 0.6,  # Lower initial stability due to transition
+                "growth_acceleration": 0.02,  # Strongest acceleration in growth
+                "salary_ceiling_factor": 4.5  # Very high ceiling (350% above starting)
             }
         }
 
@@ -1064,19 +1088,63 @@ class CareerSimulation:
             ))
             satisfaction.append(current_satisfaction)
 
-            # Calculate stability
-            current_stability = path["stability"] * (1 + 0.05 * year)  # Stability increases with time in role
-            current_stability = min(0.99, current_stability)  # Cap at 99%
+            # Calculate stability - different paths have different stability progression
+            if path_id in ["stay_bpo", "advance_bpo"]:
+                # BPO paths have quick stability gains that plateau
+                stability_factor = 1 + (0.08 * min(year, 3))  # Faster initial increase, plateaus after 3 years
+            elif path_id in ["switch_tech", "switch_business", "switch_healthcare"]:
+                # These paths have moderate stability growth that continues
+                stability_factor = 1 + (0.05 * year)  # Steady increase
+            elif path_id == "switch_education":
+                # Education has high stability that's achieved quickly
+                stability_factor = 1 + (0.1 * min(year, 2))  # Very fast initial increase, plateaus after 2 years
+            elif path_id == "switch_creative":
+                # Creative has slower stability growth with more variability
+                stability_factor = 1 + (0.04 * year) + (0.02 * np.random.random())  # Slower increase with randomness
+            elif path_id == "further_education":
+                # Further education has low initial stability that improves significantly over time
+                stability_factor = 1 + (0.03 * year) + (0.08 * max(0, year-2))  # Accelerates after year 2
+            else:
+                # Default case
+                stability_factor = 1 + (0.05 * year)
+
+            # Apply stability factor and add randomness based on variance
+            base_stability = path["stability"] * stability_factor
+            stability_variance = 0.05  # 5% variance in stability
+            current_stability = base_stability * (1 + (stability_variance * (np.random.random() - 0.5)))
+
+            # Cap at 99%
+            current_stability = min(0.99, current_stability)
             stability.append(current_stability)
 
             # Update for next year if not at the end
             if year < self.time_horizon:
-                # Apply salary growth
-                current_salary *= (1 + path["salary_growth_rate"])
+                # Calculate growth rate with acceleration
+                current_growth_rate = path["salary_growth_rate"] + (path["growth_acceleration"] * year)
+
+                # Apply salary growth with ceiling check
+                max_salary = initial_salary * path["salary_ceiling_factor"]
+                growth_factor = 1 + current_growth_rate
+                potential_new_salary = current_salary * growth_factor
+
+                # Apply ceiling effect - growth slows as approaching ceiling
+                if potential_new_salary > max_salary * 0.8:
+                    # Apply diminishing returns as approaching ceiling
+                    ceiling_proximity = (potential_new_salary - (max_salary * 0.8)) / (max_salary * 0.2)
+                    growth_dampening = 1 - (ceiling_proximity * 0.8)  # Reduce growth by up to 80%
+                    growth_factor = 1 + (current_growth_rate * growth_dampening)
+
+                current_salary *= growth_factor
 
                 # Apply promotion chance
                 if np.random.random() < path["promotion_probability"]:
-                    current_salary *= 1.15  # 15% boost for promotion
+                    promotion_boost = 1.15  # Base 15% boost for promotion
+
+                    # Smaller boost if close to ceiling
+                    if current_salary > max_salary * 0.9:
+                        promotion_boost = 1.05  # Reduced to 5% if near ceiling
+
+                    current_salary *= promotion_boost
 
         # Calculate aggregate metrics
         final_salary = salaries[-1]

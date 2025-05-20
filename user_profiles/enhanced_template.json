@@ -5,9 +5,9 @@
   "bpo_experience_years": 12,
   "current_role": "Customer Service Representative",
   "current_salary": 28000,
-  "performance_level": "average",
-  "bpo_satisfaction": 2,
-  "interests": ["creative", "learning"],
+  "performance_level": "excellent",
+  "bpo_satisfaction": 6,
+  "interests": ["leadership", "specialized_bpo"],
   "financial_pressure": "low",
   "work_life_balance_importance": "medium",
   "personality_traits": {
@@ -16,6 +16,6 @@
     "openness": "high"
   },
   "identified_alternative_field": false,
-  "alternative_field": "healthcare",
+  "alternative_field": "",
   "researched_requirements": true
 }
